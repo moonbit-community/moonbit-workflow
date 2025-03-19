@@ -89,9 +89,9 @@ jobs:
           moon info --target wasm,wasm-gc,js,native
           git diff --exit-code
 
-      - name: moon fmt
+      - name: format diff
         run: |
-          moon fmt
+          moon fmt --block-style
           git diff --exit-code
 
       - name: Setup MSVC
