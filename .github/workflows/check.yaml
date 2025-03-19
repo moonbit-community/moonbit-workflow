@@ -21,7 +21,7 @@ jobs:
           - name: windows-latest
             version: stable
       fail-fast: false
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.name }}
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
