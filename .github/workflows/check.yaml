@@ -21,7 +21,9 @@ jobs:
           - name: windows-latest
             version: stable
 
-          # bleeding check install latest core library from github.com
+          # bleeding check 
+          # 1. install latest toolchain 
+          # 2. install latest core library from github.com
           - name: ubuntu-latest
             version: bleeding
           - name: macos-latest
