@@ -81,7 +81,7 @@ jobs:
           echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: add env path on windows
-        if: ${{ matrix.os.name = 'windows-latest' }}
+        if: ${{ matrix.os.name == 'windows-latest' }}
         run: |
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       
