@@ -21,15 +21,7 @@ jobs:
           - name: windows-latest
             version: stable
 
-          - name: ubuntu-latest
-            version: nightly
-          - name: macos-latest
-            version: nightly
-          - name: macos-13
-            version: nightly
-          - name: windows-latest
-            version: nightly
-
+          # bleeding check install latest core library from github.com
           - name: ubuntu-latest
             version: bleeding
           - name: macos-latest
@@ -54,23 +46,17 @@ jobs:
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'stable' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-
-      - name: install nightly version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'nightly' }}
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s 'nightly'
-
-      - name: install nightly version on windows
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'nightly' }}
-        run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
           
       - name: install bleeding version on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'bleeding' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s bleeding
+        # passing bleeding as argument to unix.sh
 
       - name: install bleeding version on windows
+        env:
+          MOONBIT_INSTALL_VERSION: bleeding
+        # set global env variable for powershell.ps1
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'bleeding' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
