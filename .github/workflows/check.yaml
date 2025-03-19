@@ -20,6 +20,25 @@ jobs:
             version: stable
           - name: windows-latest
             version: stable
+
+          - name: ubuntu-latest
+            version: nightly
+          - name: macos-latest
+            version: nightly
+          - name: macos-13
+            version: nightly
+          - name: windows-latest
+            version: nightly
+
+          - name: ubuntu-latest
+            version: bleeding
+          - name: macos-latest
+            version: bleeding
+          - name: macos-13
+            version: bleeding
+          - name: windows-latest
+            version: bleeding
+
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
