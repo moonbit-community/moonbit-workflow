@@ -49,38 +49,42 @@ jobs:
         if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'stable' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: install stable version on windows
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'stable' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
       - name: install nightly version on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'nightly' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s 'nightly'
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: install nightly version on windows
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'nightly' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
           
       - name: install bleeding version on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'bleeding' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s bleeding
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
 
       - name: install bleeding version on windows
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'bleeding' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
+      - name: add env path on unix
+        if: ${{ matrix.os.name != 'windows-latest' }}
+        run: |
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: add env path on windows
+        if: ${{ matrix.os.name = 'windows-latest' }}
+        run: |
+          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+      
       - name: moon version
         run: |
           moon version --all
