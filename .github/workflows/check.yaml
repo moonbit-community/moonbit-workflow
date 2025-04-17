@@ -1,6 +1,10 @@
 name: check
 
 on:
+  schedule:
+    # Automated every Friday at 02::30
+    # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
+    - cron: "30 2 * * 4"
   workflow_dispatch:
   push:
     branches:
