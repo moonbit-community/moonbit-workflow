@@ -33,6 +33,16 @@ jobs:
           - name: windows-latest
             version: bleeding
 
+          # pre-release check
+          - name: ubuntu-latest
+            version: pre-release
+          - name: macos-latest
+            version: pre-release
+          - name: macos-13
+            version: pre-release
+          - name: windows-latest
+            version: pre-release
+
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
@@ -60,6 +70,20 @@ jobs:
           MOONBIT_INSTALL_VERSION: bleeding
         # set global env variable for powershell.ps1
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'bleeding' }}
+        run: |
+          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+
+      - name: install pre-release version on unix
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'pre-release' }}
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s pre-release
+        # passing pre-release as argument to unix.sh
+
+      - name: install pre-release version on windows
+        env:
+          MOONBIT_INSTALL_VERSION: pre-release
+        # set global env variable for powershell.ps1
+        if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'pre-release' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
