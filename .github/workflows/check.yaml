@@ -25,8 +25,8 @@ jobs:
           - name: windows-latest
             version: stable
 
-          # bleeding check 
-          # 1. install latest toolchain 
+          # bleeding check
+          # 1. install latest toolchain
           # 2. install latest core library from github.com
           - name: ubuntu-latest
             version: bleeding
@@ -62,7 +62,7 @@ jobs:
         if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'stable' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-          
+
       - name: install bleeding version on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'bleeding' }}
         run: |
@@ -100,12 +100,12 @@ jobs:
         if: ${{ matrix.os.name == 'windows-latest' }}
         run: |
           "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-      
+
       - name: moon version
         run: |
           moon version --all
           moonrun --version
-      
+
       - name: install module dependencies
         run: |
           moon update
@@ -140,14 +140,14 @@ jobs:
 
       - name: moon test with dedup_wasm
         if: ${{ matrix.os.name != 'windows-latest' }}
-        env: 
+        env:
           MOONC_INTERNAL_PARAMS: dedup_wasm = 1 |
 
         run: |
           moon clean
           ulimit -s 8176
           moon test --target wasm,wasm-gc
-          moon test --target wasm,wasm-gc --release 
+          moon test --target wasm,wasm-gc --release
 
       - name: moon test --doc
         run: |
@@ -176,20 +176,20 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
       - run: |
-          npm install --global prettier
-          npx prettier . --write
-          git diff --exit-code
-      
+          npm install --global prettier;
+          find . -name *.mod.json -exec npx prettier --write {} \;
+          find . -name *.pkg.json -exec npx prettier --write {} \;
+          git diff --exit-code;
+
   check-typos:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: AutoCorrect
+        uses: huacnlee/autocorrect-action@v2
 
-    - name: AutoCorrect
-      uses: huacnlee/autocorrect-action@v2
-
-    - name: typos-action
-      uses: crate-ci/typos@v1.31.1
+      - name: typos-action
+        uses: crate-ci/typos@v1.31.1
