@@ -17,54 +17,47 @@ jobs:
       matrix:
         os:
           - name: ubuntu-latest
-            version: stable
+            triple: x86_64-linux-gnu-ubuntu
           - name: macos-latest
-            version: stable
+            triple: arm64-apple-darwin
           - name: macos-13
-            version: stable
+            triple: x86_64-apple-darwin
           - name: windows-latest
-            version: stable
+            triple: x86_64-w64-mingw32
+
+          # stable check
+
+          # pre-release check
 
           # bleeding check
           # 1. install latest toolchain
           # 2. install latest core library from github.com
-          - name: ubuntu-latest
-            version: bleeding
-          - name: macos-latest
-            version: bleeding
-          - name: macos-13
-            version: bleeding
-          - name: windows-latest
-            version: bleeding
-
-          # pre-release check
-          - name: ubuntu-latest
-            version: pre-release
-          - name: macos-latest
-            version: pre-release
-          - name: macos-13
-            version: pre-release
-          - name: windows-latest
-            version: pre-release
-
+        version: [stable,pre-release,bleeding]
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
 
+      - name: gcc version
+        run: |
+          echo "" | gcc -xc - -v -E 
+      - name: clang version
+        run: |
+          echo "" | clang -xc - -v -E
+
       - name: install stable version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'stable' }}
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
 
       - name: install stable version on windows
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'stable' }}
+        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'stable' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
       - name: install bleeding version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'bleeding' }}
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'bleeding' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s bleeding
         # passing bleeding as argument to unix.sh
@@ -73,12 +66,12 @@ jobs:
         env:
           MOONBIT_INSTALL_VERSION: bleeding
         # set global env variable for powershell.ps1
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'bleeding' }}
+        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'bleeding' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
       - name: install pre-release version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.os.version == 'pre-release' }}
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'pre-release' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s pre-release
         # passing pre-release as argument to unix.sh
@@ -87,7 +80,7 @@ jobs:
         env:
           MOONBIT_INSTALL_VERSION: pre-release
         # set global env variable for powershell.ps1
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.os.version == 'pre-release' }}
+        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'pre-release' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
