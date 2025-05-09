@@ -39,15 +39,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: gcc version
+      # - name: gcc version
+      #   run: |
+      #     echo "" | gcc -xc - -v -E 
+      # - name: clang version
+      #   run: |
+      #     echo "" | clang -xc - -v -E
+
+      - name: Set Github Action Global Variable
+        if: ${{ matrix.os.name != 'windows-latest' }} 
+        id: global
         run: |
-          echo "" | gcc -xc - -v -E 
-      - name: clang version
-        run: |
-          echo "" | clang -xc - -v -E
+          echo "year_week=$(/bin/date -u "+%Y-%V")" >> $GITHUB_OUTPUT
+          echo "year_month_day=$(/bin/date -u "+%Y-%m-%d")" >> $GITHUB_OUTPUT
+          echo "home=$(echo $HOME)" >> $GITHUB_OUTPUT
+        shell: bash 
+
+      # every week
+      - name: cache moonbit toolchain stable on unix
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
+        id: cache-moonbit-toolchain-stable
+        uses: actions/cache@v4
+        with: 
+          path: "${{ steps.global.outputs.home }}/.moon"
+          key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_week }}"
+
+      # every week
+      - name: cache moonbit toolchain pre-release on unix
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'pre-release' }}
+        id: cache-moonbit-toolchain-pre-release
+        uses: actions/cache@v4
+        with: 
+          path: "${{ steps.global.outputs.home }}/.moon"
+          key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_week }}"
+
+      # every day
+      - name: cache moonbit toolchain bleeding on unix
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'bleeding' }}
+        id: cache-moonbit-toolchain-bleeding
+        uses: actions/cache@v4
+        with: 
+          path: "${{ steps.global.outputs.home }}/.moon"
+          key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_month_day }}"
 
       - name: install stable version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' && steps.cache-moonbit-toolchain-stable.outputs.cache-hit != 'true' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
 
@@ -66,12 +102,12 @@ jobs:
         env:
           MOONBIT_INSTALL_VERSION: bleeding
         # set global env variable for powershell.ps1
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'bleeding' }}
+        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'bleeding' && steps.cache-moonbit-toolchain-bleeding.outputs.cache-hit != 'true' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
       - name: install pre-release version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'pre-release' }}
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'pre-release' && steps.cache-moonbit-toolchain-stable.outputs.cache-hit != 'true' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s pre-release
         # passing pre-release as argument to unix.sh
