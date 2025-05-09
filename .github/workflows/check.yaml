@@ -15,9 +15,10 @@ jobs:
   check:
     strategy:
       matrix:
+        version: [stable,pre-release,bleeding]
         os:
           - name: ubuntu-latest
-            triple: x86_64-linux-gnu-ubuntu
+            triple: x86_64-linux-gnu
           - name: macos-latest
             triple: arm64-apple-darwin
           - name: macos-13
@@ -32,67 +33,39 @@ jobs:
           # bleeding check
           # 1. install latest toolchain
           # 2. install latest core library from github.com
-        version: [stable,pre-release,bleeding]
+          
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
 
-      - name: gcc version
+      - name: set moonbit install version
+        if: ${{ matrix.version != 'stable' }}
         run: |
-          echo "" | gcc -xc - -v -E 
-      - name: clang version
-        run: |
-          echo "" | clang -xc - -v -E
+          echo "MOONBIT_INSTALL_VERSION=${{ matrix.version }}" >> $GITHUB_ENV
+        shell: bash
 
-      - name: install stable version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
+      - name: Set Github Action Global Variable
+        id: global
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          node .ci/set_global.mjs
 
-      - name: install stable version on windows
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'stable' }}
-        run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
+      - name: cache moonbit toolchain
+        id: cache-moonbit-toolchain
+        uses: actions/cache@v4
+        with: 
+          path: "${{ steps.global.outputs.home }}/.moon"
+          key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.key }}"
 
-      - name: install bleeding version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'bleeding' }}
+      - name: install moonbit toolchain
+        if: ${{ steps.cache-moonbit-toolchain.outputs.cache-hit != 'true' }}
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s bleeding
-        # passing bleeding as argument to unix.sh
-
-      - name: install bleeding version on windows
-        env:
-          MOONBIT_INSTALL_VERSION: bleeding
-        # set global env variable for powershell.ps1
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'bleeding' }}
+          node .ci/setup_moon.mjs
+      
+      - name: add moonbit path
         run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-
-      - name: install pre-release version on unix
-        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'pre-release' }}
-        run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s pre-release
-        # passing pre-release as argument to unix.sh
-
-      - name: install pre-release version on windows
-        env:
-          MOONBIT_INSTALL_VERSION: pre-release
-        # set global env variable for powershell.ps1
-        if: ${{ matrix.os.name == 'windows-latest' && matrix.version == 'pre-release' }}
-        run: |
-          Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
-
-      - name: add env path on unix
-        if: ${{ matrix.os.name != 'windows-latest' }}
-        run: |
-          echo "$HOME/.moon/bin" >> $GITHUB_PATH
-
-      - name: add env path on windows
-        if: ${{ matrix.os.name == 'windows-latest' }}
-        run: |
-          "C:\Users\runneradmin\.moon\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          node .ci/add_moon_path.mjs
 
       - name: moon version
         run: |
