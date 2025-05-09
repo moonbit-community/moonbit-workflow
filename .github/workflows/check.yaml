@@ -46,8 +46,24 @@ jobs:
         run: |
           echo "" | clang -xc - -v -E
 
-      - name: install stable version on unix
+      - name: Year and Week number
+        if: ${{ matrix.os.name != 'windows-latest' }} 
+        id: year-week
+        run: |
+          echo "date=$(/bin/date -u "+%Y-%V")" >> $GITHUB_OUTPUT
+        shell: bash 
+
+
+      - name: cache moonbit toolchain stable on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
+        id: cache-moonbit-toolchain-stable
+        uses: actions/cache@v4
+        with: 
+          path: $HOME/.moon
+          key: ${{ runner.os }}-moonbit-${{ matrix.version }}-${{ steps.year-week.outputs.date }}
+
+      - name: install stable version on unix
+        if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' && steps.cache-moonbit-toolchain-stable.outputs.cache-hit != 'true' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
 
