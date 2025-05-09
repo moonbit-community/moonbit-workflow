@@ -97,7 +97,6 @@ jobs:
       - name: moon version
         run: |
           moon version --all
-          moonrun --version
 
       - name: install module dependencies
         run: |
