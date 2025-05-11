@@ -39,6 +39,8 @@ jobs:
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: set moonbit install version
         if: ${{ matrix.version != 'stable' }}
