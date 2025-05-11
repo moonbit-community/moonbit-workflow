@@ -15,9 +15,10 @@ jobs:
   check:
     strategy:
       matrix:
+        version: [stable,pre-release,bleeding]
         os:
           - name: ubuntu-latest
-            triple: x86_64-linux-gnu-ubuntu
+            triple: x86_64-linux-gnu
           - name: macos-latest
             triple: arm64-apple-darwin
           - name: macos-13
@@ -32,19 +33,11 @@ jobs:
           # bleeding check
           # 1. install latest toolchain
           # 2. install latest core library from github.com
-        version: [stable,pre-release,bleeding]
       fail-fast: false
     runs-on: ${{ matrix.os.name }}
     continue-on-error: false
     steps:
       - uses: actions/checkout@v4
-
-      - name: gcc version
-        run: |
-          echo "" | gcc -xc - -v -E 
-      - name: clang version
-        run: |
-          echo "" | clang -xc - -v -E
 
       - name: install stable version on unix
         if: ${{ matrix.os.name != 'windows-latest' && matrix.version == 'stable' }}
