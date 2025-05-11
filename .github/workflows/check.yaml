@@ -17,7 +17,7 @@ jobs:
       matrix:
         os:
           - name: ubuntu-latest
-            triple: x86_64-linux-gnu-ubuntu
+            triple: x86_64-linux-gnu
           - name: macos-latest
             triple: arm64-apple-darwin
           - name: macos-13
@@ -58,11 +58,6 @@ jobs:
           echo "MOONBIT_INSTALL_VERSION=bleeding" >> $GITHUB_ENV
         shell: bash
 
-      - name: output env $MOONBIT_INSTALL_VERSION
-        run: |
-          echo $MOONBIT_INSTALL_VERSION
-        shell: bash
-
       - name: set my_home
         run: |
           echo $HOME >> my_home.txt      
@@ -75,42 +70,31 @@ jobs:
           echo "home=$(cat my_home.txt)" >> $GITHUB_OUTPUT
         shell: bash 
 
-
-
       # every week
-      - name: cache moonbit toolchain stable
-        if: ${{ matrix.version == 'stable' }}
-        id: cache-moonbit-toolchain-stable
-        uses: actions/cache@v4
-        with: 
-          path: "${{ steps.global.outputs.home }}/.moon"
-          key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_week }}"
-
-      # every week
-      - name: cache moonbit toolchain pre-release
-        if: ${{ matrix.version == 'pre-release' }}
-        id: cache-moonbit-toolchain-pre-release
+      - name: cache moonbit toolchain every week
+        if: ${{ matrix.version == 'stable' ||  matrix.version == 'pre-release'  }}
+        id: cache-moonbit-toolchain-every-week
         uses: actions/cache@v4
         with: 
           path: "${{ steps.global.outputs.home }}/.moon"
           key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_week }}"
 
       # every day
-      - name: cache moonbit toolchain bleeding 
+      - name: cache moonbit toolchain every day 
         if: ${{ matrix.version == 'bleeding' }}
-        id: cache-moonbit-toolchain-bleeding
+        id: cache-moonbit-toolchain-every-day
         uses: actions/cache@v4
         with: 
           path: "${{ steps.global.outputs.home }}/.moon"
           key: "${{ matrix.os.name }}-${{ matrix.version }}-${{ steps.global.outputs.year_month_day }}"
 
       - name: install on unix
-        if: ${{ matrix.os.name != 'windows-latest' && steps.cache-moonbit-toolchain-stable.outputs.cache-hit != 'true' }}
+        if: ${{ matrix.os.name != 'windows-latest' && steps.cache-moonbit-toolchain-every-week.outputs.cache-hit != 'true' }}
         run: |
           curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s $MOONBIT_INSTALL_VERSION
 
       - name: install on windows
-        if: ${{ matrix.os.name == 'windows-latest' && steps.cache-moonbit-toolchain-stable.outputs.cache-hit != 'true' }}
+        if: ${{ matrix.os.name == 'windows-latest' && steps.cache-moonbit-toolchain-every-week.outputs.cache-hit != 'true' }}
         run: |
           Set-ExecutionPolicy RemoteSigned -Scope CurrentUser; irm https://cli.moonbitlang.com/install/powershell.ps1 | iex
 
