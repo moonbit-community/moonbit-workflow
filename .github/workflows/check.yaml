@@ -1,10 +1,10 @@
 name: check
 
 on:
-  schedule:
+  # schedule:
     # Runs at 02:30, only on Friday.
     # https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
-    - cron: "30 2 * * 5"
+    # - cron: "30 2 * * 5"
   workflow_dispatch:
   push:
     branches:
