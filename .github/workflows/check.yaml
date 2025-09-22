@@ -107,7 +107,7 @@ jobs:
       - uses: actions/setup-node@v4
       - run: |
           npm install --global prettier;
-          sudo apt install fd-find -y
+          apt install fd-find
           fd moon.mod.json -x npx prettier --write {}
           fd moon.pkg.json -x npx prettier --write {}
 
