@@ -107,9 +107,9 @@ jobs:
       - uses: actions/setup-node@v4
       - run: |
           npm install --global prettier;
-          find . -name *.mod.json -exec npx prettier --write {} \;
-          find . -name *.pkg.json -exec npx prettier --write {} \;
-          git diff --exit-code;
+          apt install fd-find
+          fd moon.mod.json -x npx prettier --write {}
+          fd moon.pkg.json -x npx prettier --write {}
 
   check-typos:
     runs-on: ubuntu-latest
