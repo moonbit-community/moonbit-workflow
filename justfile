@@ -1,4 +1,5 @@
 fmt-json: 
-    find . -name *.mod.json -exec npx prettier --write {} \;
-    find . -name *.pkg.json -exec npx prettier --write {} \;
-    
+    fd moon.mod.json -x npx prettier --write {}
+    fd moon.pkg.json -x npx prettier --write {}
+
+# https://github.com/sharkdp/fd
