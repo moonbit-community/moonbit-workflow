@@ -17,7 +17,7 @@ jobs:
   check:
     strategy:
       matrix:
-        version: [stable]
+        version: [latest]
         os:
           - name: ubuntu-latest
             triple: x86_64-linux-gnu
@@ -43,7 +43,7 @@ jobs:
           fetch-depth: 1
       
       - name: Setup Moon
-        uses: illusory0x0/setup-moonbit@v0.1.0
+        uses: hustcer/setup-moonbit@develop
         with: 
           version: ${{ matrix.version }}
 
@@ -54,7 +54,6 @@ jobs:
       - name: install module dependencies
         run: |
           moon update
-          moon install
 
       - name: moon check
         run: moon check --deny-warn
@@ -80,8 +79,8 @@ jobs:
 
       - name: moon test
         run: |
-          moon test --target all,native
-          moon test --target all,native --release
+          moon test --target all
+          moon test --target all --release
 
   moon-json-format-check:
     runs-on: ubuntu-latest
